@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JUSTNATURAL 老年围术期精准营养匹配系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Noto Sans SC", sans-serif; background: #fafaf7; color: #333; line-height: 1.6; }
+.header { background: #1b4332; color: #fff; padding: 20px 40px; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header p { font-size: 13px; color: #c8d2c8; margin-top: 4px; }
+.container { max-width: 960px; margin: 0 auto; padding: 30px 20px; }
+.step-indicator { display: flex; gap: 10px; margin-bottom: 30px; }
+.step { flex: 1; padding: 12px 16px; background: #eee; border-radius: 8px; text-align: center; font-size: 13px; color: #888; }
+.step.active { background: #1b4332; color: #fff; }
+.step.done { background: #5a785a; color: #fff; }
+.card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.card h2 { font-size: 18px; color: #1b4332; margin-bottom: 16px; }
+.surgery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.surgery-item { padding: 16px; border: 2px solid #e5e5e0; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+.surgery-item:hover { border-color: #5a785a; background: #f5f8f5; }
+.surgery-item.selected { border-color: #1b4332; background: #e8f0e8; }
+.surgery-item .code { font-size: 18px; font-weight: 700; color: #1b4332; }
+.surgery-item .name { font-size: 14px; margin-top: 4px; }
+.surgery-item .examples { font-size: 12px; color: #888; margin-top: 6px; }
+.time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.time-item { padding: 20px; border: 2px solid #e5e5e0; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.time-item:hover { border-color: #5a785a; }
+.time-item.selected { border-color: #1b4332; background: #e8f0e8; }
+.time-item .label { font-size: 22px; font-weight: 700; color: #1b4332; }
+.time-item .period { font-size: 14px; margin-top: 6px; }
+.time-item .desc { font-size: 12px; color: #888; margin-top: 8px; }
+.baseline-list { display: flex; flex-direction: column; gap: 10px; }
+.baseline-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e5e5e0; border-radius: 8px; cursor: pointer; }
+.baseline-item.selected { border-color: #1b4332; background: #e8f0e8; }
+.baseline-item input { width: 18px; height: 18px; accent-color: #1b4332; }
+.baseline-item .label { font-size: 14px; font-weight: 500; }
+.baseline-item .desc { font-size: 12px; color: #888; }
+.btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: 500; }
+.btn-primary { background: #1b4332; color: #fff; }
+.btn-secondary { background: #e5e5e0; color: #555; }
+.btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+.result-section { margin-bottom: 24px; }
+.result-section h3 { font-size: 16px; color: #1b4332; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e8f0e8; }
+.product-card { background: #f9f9f6; border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 4px solid #1b4332; }
+.product-card .product-id { font-size: 18px; font-weight: 700; color: #1b4332; }
+.product-card .product-name { font-size: 14px; color: #555; margin-left: 8px; }
+.component-list { margin-top: 10px; }
+.component-item { font-size: 13px; color: #555; padding: 6px 0; border-bottom: 1px dashed #e0e0e0; }
+.component-item:last-child { border-bottom: none; }
+.component-item .comp-name { font-weight: 600; color: #333; }
+.component-item .mech { color: #666; margin-top: 2px; }
+.stop-notice { background: #fff5f0; border: 1px solid #e8c4b0; border-radius: 8px; padding: 14px; margin-top: 16px; }
+.stop-notice h4 { color: #b4443c; font-size: 14px; margin-bottom: 8px; }
+.stop-notice p { font-size: 13px; color: #8b5a50; }
+.pathway-box { background: #f0f4f0; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+.pathway-box .label { font-size: 12px; color: #5a785a; font-weight: 600; }
+.pathway-box .content { font-size: 13px; color: #444; margin-top: 4px; }
+.hidden { display: none; }
+.overview-box { background: #e8f0e8; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.overview-box .row { display: flex; gap: 20px; font-size: 13px; }
+.overview-box .row span { color: #1b4332; font-weight: 600; }
+.gap-notice { background: #fff8e8; border: 1px solid #e8d8a0; border-radius: 8px; padding: 14px; margin-top: 16px; }
+.gap-notice h4 { color: #b08020; font-size: 14px; margin-bottom: 8px; }
+.gap-notice p { font-size: 13px; color: #8b7040; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JUSTNATURAL 老年围术期精准营养匹配系统</h1>
+  <p>64款分子靶向产品 × 手术应激类型 × 时间窗 × 老年基线修正</p>
+</div>
+
+<div class="container">
+  <!-- Step 1: 选择手术类型 -->
+  <div id="step1">
+    <div class="step-indicator">
+      <div class="step active">1. 选择手术类型</div>
+      <div class="step">2. 选择时间窗</div>
+      <div class="step">3. 老年基线修正</div>
+      <div class="step">4. 匹配结果</div>
+    </div>
+    <div class="card">
+      <h2>选择手术应激类型（按分子通路分类）</h2>
+      <div class="surgery-grid" id="surgeryGrid"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep2()">下一步</button>
+    </div>
+  </div>
+
+  <!-- Step 2: 选择时间窗 -->
+  <div id="step2" class="hidden">
+    <div class="step-indicator">
+      <div class="step done">1. 选择手术类型</div>
+      <div class="step active">2. 选择时间窗</div>
+      <div class="step">3. 老年基线修正</div>
+      <div class="step">4. 匹配结果</div>
+    </div>
+    <div class="card">
+      <h2>选择时间窗（生理状态随时间剧变）</h2>
+      <div class="time-grid" id="timeGrid"></div>
+      <p style="margin-top:16px;font-size:12px;color:#999;">注：术后0-3天（急性分解期）不使用口服产品——肠麻痹、静脉营养主导、炎症风暴期靠药物控制。介入起点为术后第3-5天排气后。</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep1()">上一步</button>
+      <button class="btn btn-primary" onclick="goStep3()">下一步</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 老年基线修正 -->
+  <div id="step3" class="hidden">
+    <div class="step-indicator">
+      <div class="step done">1. 选择手术类型</div>
+      <div class="step done">2. 选择时间窗</div>
+      <div class="step active">3. 老年基线修正</div>
+      <div class="step">4. 匹配结果</div>
+    </div>
+    <div class="card">
+      <h2>老年基线修正项（勾选适用项，叠加在基础方案上）</h2>
+      <div class="baseline-list" id="baselineList"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep2()">上一步</button>
+      <button class="btn btn-primary" onclick="generateResult()">生成匹配方案</button>
+    </div>
+  </div>
+
+  <!-- Step 4: 结果 -->
+  <div id="step4" class="hidden">
+    <div class="step-indicator">
+      <div class="step done">1. 选择手术类型</div>
+      <div class="step done">2. 选择时间窗</div>
+      <div class="step done">3. 老年基线修正</div>
+      <div class="step active">4. 匹配结果</div>
+    </div>
+    <div class="overview-box" id="overviewBox"></div>
+    <div id="resultContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep3()">重新调整</button>
+      <button class="btn btn-primary" onclick="resetAll()">重新开始</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 数据层 ==========
+
+const surgeries = {
+  A: {
+    name: "心血管",
+    examples: "CABG、瓣膜置换、支架介入、大血管手术",
+    corePathway: "缺血再灌注后NF-κB爆发式激活 + Nrf2抗氧化储备不足；内皮NO通路紊乱；TGF-β介导心肌纤维化；术后房颤",
+    windows: {
+      W1: {
+        pathway: "慢性炎症基线、内皮功能低下、LDL氧化",
+        products: [
+          { id: "23", name: "血管内皮保护", components: [
+            { name: "EGCG", mech: "触发Fyn蛋白激活PI3K/Akt/eNOS通路增加NO生成，同时激活Nrf2/HO-1上调SOD、GSH-Px清除ROS、抑制eNOS解偶联" },
+            { name: "番茄红素", mech: "调控内皮TGF-β1/bFGF表达抑制TGF-β1/Smad促纤维化信号，通过VEGF/PI3K/Akt促进血管新生改善缺血灌注" },
+            { name: "阿魏酸", mech: "调控TGF-β1/Smad减轻心肌纤维化，经VEGF/PI3K/Akt促进缺血区血管新生" },
+            { name: "黄芪多糖", mech: "激活心肌PI3K/Akt/eNOS增强NO生物利用度并抑制线粒体凋亡途径，抑制Ang II诱导的氧化应激和炎症" },
+            { name: "酸枣仁皂甙", mech: "增强GABA_A受体抑制性突触传递降低交感神经兴奋性，抑制心肌L-型钙通道异常开放发挥抗心律失常作用" }
+          ]},
+          { id: "21", name: "血脂调节", components: [
+            { name: "葛根黄酮", mech: "激活PI3K/Akt/eNOS信号轴促进eNOS第1177位丝氨酸磷酸化增加内皮NO生物利用度，拮抗ET-1恢复血管舒张功能" },
+            { name: "EGCG", mech: "激活Nrf2/ARE上调SOD、GSH-Px清除ROS，阻断ox-LDL诱导的NF-κB核转位与TNF-α、IL-6释放" },
+            { name: "姜黄素", mech: "竞争性抑制TLR4受体及其下游MAPK/NF-κB信号级联，减少巨噬细胞炎症小体激活与泡沫细胞形成" },
+            { name: "山楂黄酮", mech: "调控AMPK/SREBP-1/ACC1抑制肝脏及血管周围脂质合成，上调PPARα促进脂肪酸β-氧化减少脂质异位沉积" },
+            { name: "荷叶碱", mech: "直接激活AMPK促进线粒体脂肪酸氧化，抑制前脂肪细胞分化及脂质蓄积" }
+          ]},
+          { id: "22", name: "血压调节", components: [
+            { name: "山楂黄酮", mech: "抑制血管平滑肌L型钙通道减少Ca²⁺内流，同时促进内皮释放NO激活cGMP/PKG通路介导血管舒张" },
+            { name: "绿原酸", mech: "竞争性抑制ACE减少血管紧张素II生成，通过激活钾通道促使血管平滑肌超极化舒张降低外周阻力" },
+            { name: "芹菜素", mech: "抑制ACE及肾小管钠钾泵促进Na⁺排泄，促进内皮eNOS磷酸化增加NO生物利用度舒张血管" },
+            { name: "燕麦β-葡聚糖", mech: "在肠道形成凝胶基质吸附Na⁺阻碍其重吸收促进尿钠排泄，改善胰岛素敏感性间接抑制交感神经过度兴奋" }
+          ]}
+        ],
+        stopNotice: "21号术前3天停（含姜黄素抗血小板成分）"
+      },
+      W2: {
+        pathway: "内皮修复、术后炎症消退、肝功能恢复",
+        products: [
+          { id: "18", name: "抗炎抗过敏", components: [
+            { name: "柠檬酸", mech: "抑制IgE介导的肥大细胞脱颗粒，阻断抗原交联→FcεRI→Syk→PLCγ→Ca²⁺释放→脱颗粒核心引擎" },
+            { name: "EGCG", mech: "抑制肥大细胞胞内Ca²⁺上升，衰减ERK1/2和NF-κB激活，抑制TNF-α、IL-6、IL-8生成释放" },
+            { name: "迷迭香酸", mech: "靶向β2-肾上腺素受体，通过抑制NF-κB降低炎症细胞浸润与黏液高分泌" },
+            { name: "甘草酸", mech: "抑制抗原引起的胞内Ca²⁺上升，降低STIM1和TRPC1表达抑制肥大细胞脱颗粒，通过NF-κB/Nrf2/HO-1双通路抗炎抗氧化" }
+          ]},
+          { id: "38", name: "肝脏解毒", components: [
+            { name: "萝卜硫素", mech: "精准结合Keap1释放Nrf2入核，启动GST、NQO1等II相解毒基因专攻氧化应激" },
+            { name: "姜黄素", mech: "双向调节——激活Nrf2提升抗氧化能力，同时抑制NF-κB和MAPK减少促炎因子释放，刺激胆囊收缩促进胆汁排泄" },
+            { name: "甘草酸", mech: "诱导肝脏UGT1A1和MRP2加速有毒物质排泄，通过Nrf2/ARE保护肝细胞，促进胆汁酸外排改善胆汁淤积" },
+            { name: "绿原酸", mech: "激活Nrf2/ARE上调HO-1、NQO1清除自由基，通过PPARα/γ改善肝脏脂质沉积" },
+            { name: "山药多糖", mech: "经肠-肝轴增强ZO-1/Occludin阻止LPS入血，激活AMPK/PPAR促进脂肪酸β-氧化" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "在十二指肠刷状缘将Fe³⁺还原为Fe²⁺，与铁形成可溶性络合物防止肠腔沉淀，促进DMT1转运" },
+            { name: "红枣多糖", mech: "经cAMP激活HIF-1信号通路促进EPO分泌，刺激红细胞生成" },
+            { name: "枸杞多糖", mech: "保护造血干细胞免受骨髓微环境氧化损伤，促进CFU-GM粒单系祖细胞增殖分化，调节铁调素代谢" },
+            { name: "龙眼多糖", mech: "抗氧化清除自由基，降低氧化应激对新生红细胞的破坏，改善微循环携氧能力" }
+          ]}
+        ],
+        stopNotice: "38号术后第5天起恢复（术前停的姜黄素类）"
+      },
+      W3: {
+        pathway: "心功能恢复、二级预防、认知保护",
+        products: [
+          { id: "57", name: "心脑血管保护", components: [
+            { name: "黄芪多糖", mech: "调控TLR4/NF-κB/NLRP3炎症小体通路，抑制小胶质细胞过度活化及IL-6、TNF-α释放，稳定线粒体膜电位抑制缺血再灌注后凋亡" },
+            { name: "葛根黄酮", mech: "清除缺血组织氧自由基，降低MDA和乳酸含量，抑制谷氨酸过度释放减轻兴奋性毒性，缩小脑梗死面积" },
+            { name: "阿魏酸", mech: "激活PI3K/Akt/eNOS促进NO释放舒张血管，抑制NF-κB减轻内皮氧化损伤" },
+            { name: "山楂黄酮", mech: "激活AMPK/PPAR加速脂肪酸β-氧化并抑制HMGCR，改善脂质代谢，抑制血小板聚集降低血粘度" },
+            { name: "DHA", mech: "作为脑细胞膜核心结构成分维持膜流动性，竞争性抑制促炎花生四烯酸代谢通路，下调NLRP3炎症小体" }
+          ]},
+          { id: "26", name: "心肌能量代谢", components: [
+            { name: "黄精多糖", mech: "激活SIRT1/AMPK/PGC-1α信号通路改善线粒体呼吸链复合体活性，提升ATP生成效率解决心肌能量饥饿" },
+            { name: "山楂黄酮", mech: "上调HIF-1α/VEGF诱导缺血区毛细血管新生，改善冠脉血流储备" },
+            { name: "葛根黄酮", mech: "激活PI3K/Akt/eNOS促进NO释放，抑制缺血诱导的心肌细胞凋亡" },
+            { name: "姜黄素", mech: "激活Nrf2/HO-1清除ROS，通过调节Bcl-2/Bax比例稳定线粒体膜电位，抑制MPTP开放阻断心肌凋亡" },
+            { name: "EGCG", mech: "通过PI3K/Akt抑制缺氧/复氧诱导的心肌细胞凋亡，调节线粒体自噬清除受损细胞器" }
+          ]},
+          { id: "64", name: "线粒体+综合", components: [
+            { name: "PQQ", mech: "结合并稳定Trx1硫氧还蛋白，激活PGC-1α/Nrf2信号轴诱导线粒体生物发生" },
+            { name: "虾青素", mech: "跨越血心/血脑屏障横跨细胞膜双层抑制脂质过氧化链式反应，抑制NF-κB下调TNF-α、IL-1β" },
+            { name: "叶黄素酯", mech: "黄斑沉积、蓝光过滤与单线态氧猝灭" },
+            { name: "低聚异麦芽糖", mech: "选择性增殖双歧杆菌促进短链脂肪酸生成，维护肠道紧密连接" }
+          ]}
+        ],
+        stopNotice: "57号术后2周后且无抗凝禁忌时恢复"
+      }
+    }
+  },
+
+  B: {
+    name: "消化/肝胆",
+    examples: "胃肠切除、胆囊切除、肝部分切除、胰十二指肠切除",
+    corePathway: "肠屏障ZO-1/Claudin破坏；肝再生HGF/TGF-β；胆汁酸FXR受体；术后胃排空延迟",
+    windows: {
+      W1: {
+        pathway: "营养储备、肠屏障修复、肝功储备",
+        products: [
+          { id: "9", name: "肠屏障修复", components: [
+            { name: "姜黄素", mech: "竞争性抑制IKK激酶活性阻断IκBα降解，抑制NF-κB p65核转位，下调MAPK磷酸化，显著降低TNF-α、IL-6及COX-2表达" },
+            { name: "胶原蛋白肽", mech: "富含谷氨酰胺被肠上皮高效摄取，激活Nrf2抗氧化通路，抑制MLCK-p-MLC通路阻止紧密连接开放，提高上皮屏障完整性" },
+            { name: "EGCG", mech: "强力清除肠道局部ROS，激活Nrf2-GPX4抑制铁死亡，下调NF-κB及NLRP3炎症小体活化" },
+            { name: "山药多酚", mech: "抑制NF-κB/COX-2激活，上调Occludin、Claudin-1、ZO-1基因转录，减少上皮细胞凋亡" },
+            { name: "槲皮素", mech: "通过AMPK双重调控——抑制NF-κB促炎因子转录，强力激活Nrf2/HO-1抗氧化轴清除ROS，诱导M2型巨噬细胞极化促进组织修复" },
+            { name: "复合益生菌", mech: "竞争性占据肠上皮黏附位点，分泌细菌素抑制致病菌，调节Th17/Treg平衡促进IL-10分泌，发酵产生丁酸盐为结肠上皮供能" }
+          ]},
+          { id: "38", name: "肝脏解毒", components: [
+            { name: "萝卜硫素", mech: "精准结合Keap1释放Nrf2入核，启动GST、NQO1等II相解毒基因" },
+            { name: "姜黄素", mech: "激活Nrf2提升抗氧化能力，同时抑制NF-κB和MAPK，刺激胆囊收缩促进胆汁排泄" },
+            { name: "甘草酸", mech: "诱导肝脏UGT1A1和MRP2加速有毒物质排泄，通过Nrf2/ARE保护肝细胞" },
+            { name: "绿原酸", mech: "激活Nrf2/ARE上调HO-1、NQO1" },
+            { name: "山药多糖", mech: "经肠-肝轴增强ZO-1/Occludin阻止LPS入血，激活AMPK/PPAR促进脂肪酸β-氧化" }
+          ]},
+          { id: "54", name: "肾脏保护", components: [
+            { name: "黑豆多糖", mech: "激活Nrf2/HO-1清除自由基，抑制TLR4/Myd88/NF-κB减少TNF-α、IL-6释放" },
+            { name: "枸杞多糖", mech: "富含花青素强效清除ROS，其异黄酮成分调节RAS改善肾小球内压" },
+            { name: "山药多糖", mech: "抑制高糖诱导的AR/P38MAPK/CREB激活，拮抗TGF-β/Smad抑制上皮-间质转化减少细胞外基质沉积" },
+            { name: "花青素", mech: "极强的自由基清除能力保护肾血管内皮，改善肾小球毛细血管微循环灌注减轻缺血再灌注损伤" },
+            { name: "茯苓多糖", mech: "调节免疫细胞功能清除肾脏局部氧化自由基" },
+            { name: "薏苡仁多糖", mech: "具有温和渗透性利尿作用，调节水通道蛋白AQP表达促进代谢废物排出" }
+          ]}
+        ],
+        stopNotice: "9号术前3天停（含姜黄素）"
+      },
+      W2: {
+        pathway: "肠屏障重建、肝再生、益生菌定植",
+        products: [
+          { id: "6", name: "肠道调理", components: [
+            { name: "果胶多糖", mech: "形成高粘度凝胶网络物理吸附肠腔毒素，发酵为短链脂肪酸促进水电解质回吸收" },
+            { name: "白扁豆多糖", mech: "上调ZO-1恢复肠屏障" },
+            { name: "复合益生菌", mech: "上调Caco-2细胞ZO-1基因表达抵消肠通透性升高" }
+          ]},
+          { id: "42", name: "肝脏代谢", components: [
+            { name: "绿原酸", mech: "通过Keap1-Nrf2相互作用激活抗氧化应答元件，显著提升SOD和GSH水平，同步抑制MAPK和NF-κB磷酸化级联" },
+            { name: "山楂黄酮", mech: "激活肝脏和脂肪组织AMPK信号通路，抑制SREBP-1c和FAS酶表达减少内源性脂肪酸合成，促进脂肪酸β-氧化加速脂质分解排泄" },
+            { name: "山药多糖", mech: "作为益生元经肠道菌群发酵产生短链脂肪酸，增强肠道屏障减少LPS入血，经肠-肝轴降低全身炎症，激活PI3K/Akt改善外周胰岛素敏感性" },
+            { name: "姜黄素", mech: "抑制TLR4/NF-κB和NLRP3炎症小体组装，阻断下游促炎因子转录，同时激活Nrf2上调HO-1中和ROS" }
+          ]},
+          { id: "8", name: "益生菌", components: [
+            { name: "益生菌+低聚木糖", mech: "重建肠道菌群，竞争性黏附肠上皮，产乳酸和细菌素抑制致病菌，发酵产生SCFA为结肠上皮供能" }
+          ]}
+        ],
+        stopNotice: "6号、8号术后第7天起（排气后）恢复"
+      },
+      W3: {
+        pathway: "肝功能长期恢复、胆汁酸代谢、营养吸收",
+        products: [
+          { id: "43", name: "肝脏脂肪代谢", components: [
+            { name: "山楂黄酮", mech: "激活AMPK，抑制ACC和FAS减少内源性脂肪酸合成，促进脂肪酸β-氧化加速代谢废物排出" },
+            { name: "荷叶碱", mech: "激活肝脏AMPK抑制脂肪合成酶活性，促进胆固醇向胆汁酸转化与排泄" },
+            { name: "EGCG", mech: "激活AMPK和SIRT1长寿基因通路抑制脂肪合成酶表达，强效清除脂质过氧化自由基，阻断脂质堆积-氧化应激-炎症恶性循环" },
+            { name: "萝卜硫素", mech: "作为Nrf2和AMPK双重激活剂上调SOD和GSH，通过AMPK/Nrf2/GPx4轴减轻肝脂毒性，刺激自噬清除受损细胞器" },
+            { name: "枸杞多糖", mech: "调节肠道菌群（增加Akkermansia丰度）改善肠肝轴，减少内毒素入血促进肝脏脂质转运" },
+            { name: "DNJ", mech: "作为天然α-糖苷酶抑制剂延缓肠道碳水化合物吸收减轻肝脏糖代谢负担" }
+          ]},
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "结合并激活巨噬细胞、树突状细胞表面Dectin-1/Syk/NF-κB信号级联通路" },
+            { name: "香菇多糖", mech: "协同作用于TLR2/TLR4及Dectin-1受体，启动下游MAPK/NF-κB促进巨噬细胞极化和细胞因子分泌" },
+            { name: "黄芪多糖", mech: "调控NF-κB/MAPK及PI3K/Akt信号通路，促进巨噬细胞吞噬及T/B淋巴细胞增殖" },
+            { name: "葡萄糖酸锌", mech: "作为200+种酶的辅因子参与免疫细胞DNA/RNA合成，维持胸腺素活性及调节锌指蛋白基因表达" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "在十二指肠刷状缘将Fe³⁺还原为Fe²⁺促进DMT1转运" },
+            { name: "红枣多糖", mech: "经cAMP激活HIF-1促进EPO分泌" },
+            { name: "枸杞多糖", mech: "保护造血干细胞促进CFU-GM增殖分化" },
+            { name: "龙眼多糖", mech: "抗氧化改善微循环携氧" }
+          ]}
+        ],
+        stopNotice: "—"
+      }
+    }
+  },
+
+  C: {
+    name: "骨科/创伤",
+    examples: "髋/膝关节置换、脊柱融合、骨折内固定",
+    corePathway: "RANKL/OPG骨重塑轴；肌肉泛素-蛋白酶体分解；VTE血栓风险；慢性术后疼痛NF-κB",
+    windows: {
+      W1: {
+        pathway: "肌少症储备、骨密度、贫血、抗炎",
+        products: [
+          { id: "59", name: "骨健康", components: [
+            { name: "柠檬酸钙", mech: "通过主动转运和被动扩散穿过肠上皮进入血液，高溶解性确保不依赖胃酸的高效吸收，为骨矿化提供物理基础" },
+            { name: "葛根黄酮", mech: "激活PI3K/Akt及MAPK（p38/ERK）信号通路上调成骨细胞Runx2转录因子，调节TRPM3通道双向调控胞内Ca²⁺，促进骨基质分泌与羟基磷灰石结晶沉积" },
+            { name: "黑豆多糖", mech: "结合ERα/ERβ发挥植物雌激素样作用，上调OPG表达下调RANKL抑制破骨细胞分化，减缓绝经后骨质流失" },
+            { name: "山药多糖", mech: "激活Wnt/β-catenin信号通路促进间充质干细胞向成骨细胞分化，协同PI3K/Akt增强成骨细胞活性" },
+            { name: "茯苓多糖", mech: "靶向PDIA6激活G6PD/STAT3信号轴延缓骨髓间充质干细胞衰老，抑制STING/NF-κB过度激活减少微环境炎症因子对成骨细胞的抑制" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "在十二指肠刷状缘将Fe³⁺还原为Fe²⁺，与铁形成可溶性络合物促进DMT1转运" },
+            { name: "红枣多糖", mech: "经cAMP激活HIF-1促进EPO分泌刺激红细胞生成（老年髋部骨折贫血率>50%）" },
+            { name: "枸杞多糖", mech: "保护造血干细胞促进CFU-GM增殖分化，调节铁调素代谢" },
+            { name: "龙眼多糖", mech: "抗氧化清除自由基降低氧化应激对新生红细胞的破坏" }
+          ]},
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "结合Dectin-1/Syk/NF-κB激活巨噬细胞和中性粒细胞吞噬杀伤" },
+            { name: "香菇多糖", mech: "作用于TLR2/TLR4启动MAPK/NF-κB促进sIgA分泌" },
+            { name: "黄芪多糖", mech: "调控NF-κB/MAPK及PI3K/Akt促进T/B淋巴细胞增殖" },
+            { name: "葡萄糖酸锌", mech: "作为200+种酶辅因子参与T细胞DNA/RNA合成，维持胸腺素活性" }
+          ]},
+          { id: "60", name: "关节抗炎", components: [
+            { name: "姜黄素", mech: "抑制NF-κB核转位及MAPK通路，下调COX-2、iNOS表达减少PGE2合成，抑制MMP-13等基质降解酶转录" },
+            { name: "阿魏酸", mech: "抑制TNF/TNFR信号转导下调NF-κB减少IL-1β、TNF-α释放，通过ERK1/2诱导自噬抑制软骨细胞凋亡，上调Aggrecan和糖基转移酶基因表达促进蛋白聚糖合成，激活PPARγ/SOD2清除ROS改善软骨线粒体代谢" },
+            { name: "苦杏仁苷", mech: "抑制NF-κB改善软骨细胞自噬流，下调MMP-13、ADAMTS5" },
+            { name: "山药多糖", mech: "激活Wnt/β-catenin促进II型胶原和Aggrecan合成" },
+            { name: "茯苓多糖", mech: "抑制TLR4/NF-κB及JAK2/STAT3减少促炎因子，调节水通道蛋白减轻滑膜水肿" },
+            { name: "薏苡仁多糖", mech: "抑制COX和脂氧合酶减少炎症介质" }
+          ]}
+        ],
+        stopNotice: "60号术前3天停（含姜黄素）"
+      },
+      W2: {
+        pathway: "切口愈合、骨痂形成、炎症消退",
+        products: [
+          { id: "59", name: "骨健康", components: [
+            { name: "柠檬酸钙", mech: "高溶解性吸收为骨矿化提供物理基础" },
+            { name: "葛根黄酮", mech: "激活PI3K/Akt及MAPK上调成骨细胞Runx2，促进骨基质分泌与羟基磷灰石结晶" },
+            { name: "黑豆多糖", mech: "结合ERα/ERβ上调OPG下调RANKL抑制破骨细胞" },
+            { name: "山药多糖", mech: "激活Wnt/β-catenin促进间充质干细胞成骨分化" },
+            { name: "茯苓多糖", mech: "激活G6PD/STAT3延缓骨髓间充质干细胞衰老" }
+          ]},
+          { id: "17", name: "关节修复", components: [
+            { name: "姜黄素", mech: "抑制mTOR信号通路减少IL-1β、TNF-α和MMPs产生，抑制滑膜成纤维细胞异常增殖与侵袭，激活Nrf2中和自由基" },
+            { name: "II型胶原肽", mech: "经口服免疫耐受（CII250-270）激活tolDC和Treg纠正Th1/Th17与Treg失衡，减少致病性抗体和细胞因子分泌" },
+            { name: "绿原酸", mech: "抑制TLR2/NF-κB/TNF通路降低Th17比例及IL-17水平，提高OPG表达降低RANKL抑制破骨细胞活化" },
+            { name: "阿魏酸", mech: "下调铁调素Hepcidin恢复巨噬细胞M1/M2极化平衡，抑制NF-κB和MAPK减轻滑膜炎症" },
+            { name: "茯苓多糖", mech: "调节T细胞亚群分布平衡Th1/Th2" },
+            { name: "薏苡仁多糖", mech: "抑制NF-κB下调IL-1、IL-6和TNF-α" },
+            { name: "甘草酸", mech: "打断COX-2/TxA2自反馈，抑制PI3K/AKT/NF-κB及JAK/STAT减少IL-6、IL-1β释放" }
+          ]},
+          { id: "12", name: "切口愈合", components: [
+            { name: "真菌多糖（β-葡聚糖）", mech: "激活巨噬细胞、树突状细胞及NK细胞活性，促进Th1型免疫应答调节Th1/Th2平衡" },
+            { name: "姜黄素", mech: "强力抑制NF-κB过度活化下调TNF-α、IL-6、IL-1β转录释放" },
+            { name: "葡萄糖酸锌", mech: "作为脱碘酶核心辅因子参与T4向T3转化，精细调节T细胞分化促进Tregs功能，通过金属硫蛋白和SOD减少自由基对组织的脂质过氧化损伤" },
+            { name: "维生素C", mech: "强效水溶性抗氧化剂直接中和自由基，促进胶原蛋白合成，协同锌构成酶性+非酶性双重抗氧化屏障加速受损组织修复" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "促铁吸收" },
+            { name: "红枣多糖", mech: "cAMP-HIF-1促EPO分泌" },
+            { name: "枸杞多糖", mech: "保护造血干细胞" },
+            { name: "龙眼多糖", mech: "改善微循环携氧" }
+          ]}
+        ],
+        stopNotice: "17号术后第5天起恢复"
+      },
+      W3: {
+        pathway: "骨重塑、肌肉恢复、功能锻炼期",
+        products: [
+          { id: "59", name: "骨健康", components: [
+            { name: "柠檬酸钙", mech: "骨矿化物理基础" },
+            { name: "葛根黄酮", mech: "PI3K/Akt/MAPK/Runx2成骨分化" },
+            { name: "黑豆多糖", mech: "ERα/ERβ-OPG/RANKL抑制破骨" },
+            { name: "山药多糖", mech: "Wnt/β-catenin间充质干细胞成骨分化" },
+            { name: "茯苓多糖", mech: "G6PD/STAT3延缓骨髓间充质干细胞衰老" }
+          ]},
+          { id: "17", name: "关节修复", components: [
+            { name: "姜黄素", mech: "抑制mTOR减少IL-1β/TNF-α/MMPs" },
+            { name: "II型胶原肽", mech: "口服免疫耐受诱导tolDC/Treg" },
+            { name: "绿原酸", mech: "OPG/RANKL抑制破骨细胞活化" },
+            { name: "阿魏酸", mech: "铁调素/巨噬细胞极化平衡" },
+            { name: "茯苓多糖", mech: "T细胞亚群调节" },
+            { name: "薏苡仁多糖", mech: "NF-κB/IL-1/IL-6/TNF-α" },
+            { name: "甘草酸", mech: "COX-2/TxA2/PI3K/AKT/NF-κB广谱抗炎" }
+          ]},
+          { id: "47", name: "术后疲劳恢复", components: [
+            { name: "山楂黄酮", mech: "激活AMPK促进线粒体生物合成与脂肪酸氧化，加速乳酸等疲劳代谢产物清除，提升细胞能量产出效率" },
+            { name: "萝卜硫素", mech: "激活Nrf2/ARE上调SOD、CAT等内源性抗氧化酶强力清除自由基" },
+            { name: "酸枣仁皂甙", mech: "调节HPA轴降低过高皮质醇，调节GABA能突触促进抑制性神经递质释放诱导自然睡眠，改善术后慢性疲劳伴失眠" },
+            { name: "山药多糖", mech: "激活PI3K/AKT/GSK-3β促进骨骼肌和肝脏糖原合成储备" },
+            { name: "绿原酸", mech: "抑制NF-κB降低TNF-α、IL-6水平，清除超氧阴离子降低组织耗氧量" },
+            { name: "维生素C", mech: "强效水溶性抗氧化，是肉碱和神经递质合成辅因子，参与线粒体脂肪酸转运" },
+            { name: "复合益生菌", mech: "发酵产生SCFA修复肠黏膜屏障减少内毒素入血" }
+          ]},
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "Dectin-1/Syk/NF-κB激活巨噬细胞" },
+            { name: "香菇多糖", mech: "TLR2/TLR4/MAPK/NF-κB" },
+            { name: "黄芪多糖", mech: "NF-κB/MAPK/PI3K/Akt促进T/B淋巴细胞增殖" },
+            { name: "锌", mech: "200+种酶辅因子维持胸腺素活性" }
+          ]}
+        ],
+        stopNotice: "—"
+      }
+    }
+  },
+
+  D: {
+    name: "神经/卒中",
+    examples: "脑瘤、动脉瘤、颈动脉内膜剥脱、卒中后手术",
+    corePathway: "血脑屏障；小胶质细胞NF-κB激活；谷氨酸兴奋性毒性；脑水肿AQP4",
+    windows: {
+      W1: {
+        pathway: "脑灌注、内皮功能、认知储备",
+        products: [
+          { id: "55", name: "脑营养", components: [
+            { name: "DHA", mech: "构成神经元细胞膜磷脂双分子层维持膜流动性，激活Nrf2抗氧化信号通路，促进BDNF/TrkB及CREB-BDNF通路增强突触可塑性" },
+            { name: "黑芝麻多糖", mech: "透过血脑屏障，激活AKT/IDE通路降解Aβ，抑制NF-κB减轻神经炎症，激活IRS-1/AKT改善脑胰岛素抵抗" },
+            { name: "阿魏酸", mech: "激活IGF-1/Akt促进VEGF表达和脑微血管新生，上调ZO-1、Occludin保护血脑屏障通透性" },
+            { name: "山楂黄酮", mech: "调控PI3K/Akt保护缺血再灌注损伤，改善血液流变学降低全血粘度增加脑区氧供" },
+            { name: "花青素", mech: "清除自由基上调SOD，抑制小胶质细胞过度激活降低TNF-α、IL-6" }
+          ]},
+          { id: "57", name: "心脑血管保护", components: [
+            { name: "黄芪多糖", mech: "调控TLR4/NF-κB/NLRP3抑制小胶质细胞过度活化及IL-6、TNF-α释放，稳定线粒体膜电位抑制缺血再灌注后凋亡" },
+            { name: "葛根黄酮", mech: "清除缺血组织氧自由基降低MDA和乳酸，抑制谷氨酸过度释放减轻兴奋性毒性缩小脑梗死面积" },
+            { name: "阿魏酸", mech: "激活PI3K/Akt/eNOS促进NO释放舒张血管，抑制NF-κB减轻内皮氧化损伤" },
+            { name: "山楂黄酮", mech: "激活AMPK/PPAR加速脂肪酸β-氧化抑制HMGCR，抑制血小板聚集降低血粘度" },
+            { name: "DHA", mech: "维持脑细胞膜流动性，竞争性抑制促炎花生四烯酸代谢下调NLRP3" }
+          ]},
+          { id: "56", name: "认知增强", components: [
+            { name: "酸枣仁皂甙", mech: "上调ChAT下调AChE提升ACh水平，激活PI3K/Akt/GSK-3β/CREB增强海马LTP，清除自由基" },
+            { name: "花青素", mech: "强效清除ROS，抑制NOX激活阻断氧化应激信号，抑制NF-κB/NLRP3降低小胶质细胞神经炎症因子释放" },
+            { name: "阿魏酸", mech: "调节胆碱能系统（提高ChAT/降低AChE）增加脑内ACh浓度，抑制Caspase-3凋亡上调Bcl-2，减轻脑内钙超载" },
+            { name: "山楂黄酮", mech: "提升线粒体氧化磷酸化增加ATP合成，改善血液流变学扩张脑血管改善微循环" }
+          ]}
+        ],
+        stopNotice: "55号、57号术前7-10天停（开颅/动脉瘤夹闭提前14天）"
+      },
+      W2: {
+        pathway: "神经炎症消退、认知恢复",
+        products: [
+          { id: "55", name: "脑营养", components: [
+            { name: "DHA", mech: "构成神经元细胞膜磷脂双分子层维持膜流动性，激活Nrf2并促进BDNF/TrkB/CREB增强突触可塑性" },
+            { name: "黑芝麻多糖", mech: "激活AKT/IDE降解Aβ，抑制NF-κB减轻神经炎症，激活IRS-1/AKT改善脑胰岛素抵抗" },
+            { name: "阿魏酸", mech: "上调ZO-1/Occludin保护血脑屏障" },
+            { name: "山楂黄酮", mech: "改善血液流变学增加脑区氧供" },
+            { name: "花青素", mech: "抑制小胶质细胞过度激活降低TNF-α、IL-6" }
+          ]},
+          { id: "56", name: "认知增强", components: [
+            { name: "酸枣仁皂甙", mech: "上调ChAT下调AChE提升ACh，激活PI3K/Akt/GSK-3β/CREB增强海马LTP" },
+            { name: "花青素", mech: "抑制NOX阻断氧化应激，抑制NF-κB/NLRP3降低小胶质细胞炎症" },
+            { name: "阿魏酸", mech: "调节胆碱能系统增加脑内ACh，抑制Caspase-3凋亡上调Bcl-2" },
+            { name: "山楂黄酮", mech: "提升线粒体氧化磷酸化增加ATP，改善脑微循环" }
+          ]},
+          { id: "48", name: "睡眠情绪", components: [
+            { name: "酸枣仁皂甙", mech: "调节5-HT能与GABA能突触，上调脑内GABA和5-HT水平下调Glu和DA，调节GABA_A受体α1（GABRA1）和γ2（GABRG2）亚基，影响5-HT受体HTR1A与HTR2A" },
+            { name: "GABA", mech: "特异性结合GABA_A受体（五聚体配体门控Cl⁻通道）促使Cl⁻内流神经元超极化抑制动作电位发放，同时抑制巨噬细胞与小胶质细胞活化下调NF-κB炎症通路" },
+            { name: "阿魏酸", mech: "增强GABA_A受体功能促进去甲肾上腺素释放，通过GABA能系统诱导睡眠" },
+            { name: "百合多糖", mech: "调节下丘脑神经递质提升5-HT与褪黑素降低NE，上调GABA_A与5-HT1A受体，逆转PCPA失眠模型HPA轴过度激活降低CRF、ACTH、皮质酮" },
+            { name: "茯苓酸", mech: "作为GABA_A受体正向变构调节剂上调α、β亚基，茯苓多糖经肠-脑轴产生SCFA抑制HPA轴降低皮质醇，抑制TNF-α/NF-κB" }
+          ]}
+        ],
+        stopNotice: "55号恢复需神经外科医生确认无出血风险后"
+      },
+      W3: {
+        pathway: "长期认知、脑血管二级预防",
+        products: [
+          { id: "57", name: "心脑血管保护", components: [
+            { name: "黄芪多糖", mech: "TLR4/NF-κB/NLRP3抑制小胶质细胞" },
+            { name: "葛根黄酮", mech: "清除氧自由基抑制谷氨酸兴奋性毒性" },
+            { name: "阿魏酸", mech: "PI3K/Akt/eNOS舒张血管" },
+            { name: "山楂黄酮", mech: "AMPK/PPAR改善脂质代谢" },
+            { name: "DHA", mech: "脑细胞膜流动性" }
+          ]},
+          { id: "55", name: "脑营养", components: [
+            { name: "DHA", mech: "膜磷脂补充与BDNF/TrkB/CREB突触可塑性" },
+            { name: "黑芝麻多糖", mech: "AKT/IDE/Aβ降解" },
+            { name: "阿魏酸", mech: "IGF-1/Akt/VEGF脑微血管新生与血脑屏障保护" },
+            { name: "山楂黄酮", mech: "PI3K/Akt缺血保护与血液流变学" },
+            { name: "花青素", mech: "小胶质细胞炎症抑制" }
+          ]},
+          { id: "64", name: "线粒体+综合", components: [
+            { name: "PQQ", mech: "结合稳定Trx1，激活PGC-1α/Nrf2诱导线粒体生物发生" },
+            { name: "虾青素", mech: "跨越血脑屏障清除ROS，抑制脂质过氧化链式反应与NF-κB" },
+            { name: "叶黄素酯", mech: "黄斑保护与蓝光过滤" },
+            { name: "低聚异麦芽糖", mech: "肠-脑轴调节" }
+          ]},
+          { id: "49", name: "焦虑睡眠", components: [
+            { name: "酸枣仁皂甙", mech: "抑制HPA轴降低CRH和皮质酮，提升脑内GABA和5-HT降低Glu，上调GABA_A受体α1/γ2亚基增强受体敏感性" },
+            { name: "葡萄糖酸镁", mech: "是NMDA受体天然阻滞剂，抑制谷氨酸引起的神经元过度兴奋和钙超载，促进GABA与受体结合提高脑内GABA浓度，调节神经肌肉接头兴奋性缓解焦虑导致的肌肉僵硬" },
+            { name: "茯苓多糖", mech: "经肠-脑轴重塑菌群抑制TNF-α/NF-κB神经炎症，升高海马5-HT、DA、GABA及BDNF改善神经元可塑性，抑制慢性应激HPA轴亢进" },
+            { name: "阿魏酸", mech: "增强GABA_A受体功能产生镇静作用，促进突触间隙NE和DA释放改善情绪回路，清除自由基减轻焦虑伴随的氧化应激" }
+          ]}
+        ],
+        stopNotice: "—"
+      }
+    }
+  },
+
+  E: {
+    name: "肿瘤",
+    examples: "实体瘤根治术、新辅助/辅助化疗衔接",
+    corePathway: "手术应激性免疫抑制；肌肉泛素化恶病质；化疗黏膜损伤；术后感染高风险",
+    windows: {
+      W1: {
+        pathway: "免疫储备、恶病质预防、抗炎",
+        products: [
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "结合Dectin-1/Syk/NF-κB激活巨噬细胞和中性粒细胞吞噬杀伤" },
+            { name: "香菇多糖", mech: "作用于TLR2/TLR4启动MAPK/NF-κB促进sIgA分泌" },
+            { name: "黄芪多糖", mech: "调控NF-κB/MAPK及PI3K/Akt促进T/B淋巴细胞增殖" },
+            { name: "葡萄糖酸锌", mech: "作为200+种酶辅因子参与T细胞DNA/RNA合成维持胸腺素活性" }
+          ]},
+          { id: "15", name: "免疫平衡", components: [
+            { name: "灵芝多糖", mech: "激活树突状细胞和巨噬细胞，促进Treg和Breg分化恢复免疫耐受，抑制Th17过度活化纠正Th17/Treg失衡" },
+            { name: "黄芪多糖", mech: "阻断TLR4/NF-κB及PI3K/Akt/mTOR过度磷酸化，抑制TNF-α、IL-6、IL-17转录，下调NLRP3炎性小体组装" },
+            { name: "姜黄素", mech: "作为IKK-α抑制剂阻止NF-κB p65核转位，抑制BLYS等B细胞刺激因子减少自身抗体产生，激活Nrf2清除线粒体ROS" },
+            { name: "EGCG", mech: "通过Keap1依赖性机制激活Nrf2/ARE上调SOD、CAT，抑制NLRP3保护肾脏等靶器官" },
+            { name: "山药多糖", mech: "作为益生元滋养肠道有益菌，调节巨噬细胞极化增强黏膜屏障" },
+            { name: "复合益生菌", mech: "发酵产生丁酸盐作为HDAC抑制剂诱导Treg分化抑制Th17，促进紧密连接蛋白表达修复肠漏阻断LPS全身免疫激活" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "促铁吸收DMT1转运" },
+            { name: "红枣多糖", mech: "cAMP-HIF-1促EPO分泌" },
+            { name: "枸杞多糖", mech: "保护造血干细胞促进CFU-GM" },
+            { name: "龙眼多糖", mech: "改善微循环携氧（纠正化疗后贫血）" }
+          ]}
+        ],
+        stopNotice: "19号、15号在PD-1/靶向治疗期间需肿瘤科医生逐案确认"
+      },
+      W2: {
+        pathway: "免疫恢复、化疗衔接黏膜修复、肠屏障",
+        products: [
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "Dectin-1/Syk/NF-κB激活巨噬细胞吞噬" },
+            { name: "香菇多糖", mech: "TLR2/TLR4/MAPK/NF-κB促sIgA" },
+            { name: "黄芪多糖", mech: "NF-κB/MAPK/PI3K/Akt促T/B淋巴细胞增殖" },
+            { name: "锌", mech: "200+酶辅因子维持胸腺素活性" }
+          ]},
+          { id: "9", name: "肠屏障修复", components: [
+            { name: "姜黄素", mech: "竞争性抑制IKK阻断IκBα降解抑制NF-κB p65核转位" },
+            { name: "胶原蛋白肽", mech: "富含谷氨酰胺激活Nrf2修复肠黏膜，抑制MLCK-p-MLC阻止紧密连接开放" },
+            { name: "EGCG", mech: "激活Nrf2-GPX4抑制铁死亡" },
+            { name: "山药多糖", mech: "上调Occludin/Claudin-1/ZO-1" },
+            { name: "槲皮素", mech: "AMPK双重调控抑制NF-κB激活Nrf2/HO-1诱导M2巨噬细胞极化" },
+            { name: "复合益生菌", mech: "Th17/Treg平衡+丁酸盐供能" }
+          ]},
+          { id: "36", name: "黏膜保护", components: [
+            { name: "槲皮素", mech: "激活Nrf2/HO-1清除ROS，抑制NF-κB核转位，上调Occludin、ZO-1重建肠道机械屏障" },
+            { name: "甘草酸", mech: "激活Nrf2/PINK1自噬通路清除受损线粒体，调控NOD2/RIP2/NF-κB抑制TNF-α、IL-6转录" },
+            { name: "姜黄素", mech: "强效NF-κB抑制剂阻止核转位，激活Nrf2/HO-1双重阻断氧化应激与炎症" },
+            { name: "EGCG", mech: "竞争性抑制TLR4/MyD88阻断MAPK/NF-κB，平衡Th1/Th2减少肠道免疫细胞过度浸润" },
+            { name: "低聚果糖", mech: "特异性增殖产丁酸菌，经GPR41/GPR43调节肠道免疫滋养肠上皮" },
+            { name: "山药多糖", mech: "抑制NF-κB/COX-2上调紧密连接蛋白" }
+          ]},
+          { id: "63", name: "呼吸道黏膜", components: [
+            { name: "绿原酸", mech: "激活Nrf2/ARE上调SOD、HO-1清除肺部ROS，抑制NF-κB及MAPK过度活化" },
+            { name: "维生素C", mech: "强效水溶性抗氧化清除自由基，支持胶原蛋白合成维持呼吸道黏膜结构完整性，促进中性粒细胞趋化吞噬" },
+            { name: "甘草酸", mech: "促进呼吸道黏膜分泌稀释痰液增强纤毛运动，发挥类固醇样抗炎抑制磷脂酶A2减少组胺释放保护气道上皮" },
+            { name: "葡萄糖酸锌", mech: "作为锌指蛋白核心辅因子调控呼吸道上皮紧密连接蛋白合成，维持胸腺微环境促进T细胞成熟及巨噬细胞吞噬" }
+          ]}
+        ],
+        stopNotice: "19号术后第5天起恢复；9号术后第5天起恢复"
+      },
+      W3: {
+        pathway: "恶病质预防、化疗间歇期、长期免疫监测",
+        products: [
+          { id: "47", name: "术后疲劳恢复", components: [
+            { name: "山楂黄酮", mech: "激活AMPK促进线粒体生物合成与脂肪酸氧化，加速乳酸清除提升能量产出" },
+            { name: "萝卜硫素", mech: "激活Nrf2/ARE上调SOD、CAT清除自由基" },
+            { name: "酸枣仁皂甙", mech: "调节HPA轴降低皮质醇，GABA能突触促进抑制性神经递质" },
+            { name: "山药多糖", mech: "PI3K/AKT/GSK-3β促进糖原合成储备" },
+            { name: "绿原酸", mech: "抑制NF-κB降低TNF-α、IL-6" },
+            { name: "维生素C", mech: "肉碱和神经递质合成辅因子参与线粒体脂肪酸转运" },
+            { name: "复合益生菌", mech: "SCFA修复肠屏障" }
+          ]},
+          { id: "16", name: "免疫调节", components: [
+            { name: "水飞蓟素", mech: "靶向抑制角质形成细胞PI3K/AKT/mTOR过度激活，激活NRF2/ARE上调HO-1下调NF-κB" },
+            { name: "黄芪多糖", mech: "抑制NF-κB磷酸化级联降低TNF-α、IL-6、IL-17，调节T细胞亚群抑制Th1/Th17促进Tregs分化" },
+            { name: "灵芝多糖", mech: "调节树突状细胞和巨噬细胞抑制Th17分化，通过MAPK和NF-κB减少NO和PGE2" },
+            { name: "姜黄素", mech: "多靶点阻断NF-κB和MAPK，特异性抑制NLRP3炎症小体组装阻断Caspase-1介导的IL-1β成熟" },
+            { name: "EGCG", mech: "抑制JAK-STAT和NF-κB减少IL-17转录，高效清除ROS阻断NLRP3激活" }
+          ]},
+          { id: "64", name: "线粒体+综合", components: [
+            { name: "PQQ", mech: "结合稳定Trx1，激活PGC-1α/Nrf2诱导线粒体生物发生" },
+            { name: "虾青素", mech: "跨越血脑屏障清除ROS抑制脂质过氧化与NF-κB" },
+            { name: "叶黄素酯", mech: "黄斑保护" },
+            { name: "低聚异麦芽糖", mech: "肠-脑轴与菌群调节" }
+          ]}
+        ],
+        stopNotice: "16号在PD-1/靶向治疗期间需与肿瘤科医生确认是否继续"
+      }
+    }
+  },
+
+  F: {
+    name: "泌尿/妇科",
+    examples: "前列腺癌根治、膀胱全切、子宫切除、卵巢手术",
+    corePathway: "盆底神经损伤；术中失血；性激素轴ERβ波动；淋巴水肿；术后应激性膀胱炎",
+    windows: {
+      W1: {
+        pathway: "贫血储备、抗炎、免疫",
+        products: [
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "在十二指肠刷状缘将Fe³⁺还原为Fe²⁺促进DMT1转运" },
+            { name: "红枣多糖", mech: "经cAMP激活HIF-1促进EPO分泌" },
+            { name: "枸杞多糖", mech: "保护造血干细胞促进CFU-GM" },
+            { name: "龙眼多糖", mech: "抗氧化改善微循环携氧" }
+          ]},
+          { id: "18", name: "抗炎抗过敏", components: [
+            { name: "柠檬酸", mech: "抑制IgE介导肥大细胞脱颗粒，阻断FcεRI→Syk→PLCγ→Ca²⁺释放通路" },
+            { name: "EGCG", mech: "抑制肥大细胞Ca²⁺上升衰减ERK1/2和NF-κB，抑制TNF-α、IL-6、IL-8" },
+            { name: "迷迭香酸", mech: "靶向β2-肾上腺素受体抑制NF-κB降低炎症细胞浸润" },
+            { name: "甘草酸", mech: "抑制Ca²⁺上升降低STIM1/TRPC1抑制脱颗粒，NF-κB/Nrf2/HO-1双通路抗炎抗氧化" }
+          ]},
+          { id: "19", name: "免疫调节", components: [
+            { name: "酵母β-葡聚糖", mech: "Dectin-1/Syk/NF-κB激活巨噬细胞" },
+            { name: "香菇多糖", mech: "TLR2/TLR4/MAPK/NF-κB促sIgA" },
+            { name: "黄芪多糖", mech: "NF-κB/MAPK/PI3K/Akt促T/B细胞增殖" },
+            { name: "锌", mech: "200+酶辅因子维持胸腺素活性" }
+          ]}
+        ],
+        stopNotice: "—"
+      },
+      W2: {
+        pathway: "盆底恢复、黏膜修复、淋巴水肿",
+        products: [
+          { id: "61", name: "泌尿生殖道黏膜", components: [
+            { name: "花青素", mech: "阻断致病性大肠杆菌菌毛FimH与尿路上皮甘露糖受体结合，干扰细菌生物膜形成防止细菌定植" },
+            { name: "鼠李糖乳杆菌", mech: "竞争性黏附阴道黏膜上皮占据生态位，代谢产生乳酸和H₂O₂维持微酸性环境，激活局部黏膜免疫" },
+            { name: "低聚果糖", mech: "作为特异性益生元靶向激活生殖道内源性双歧杆菌和乳酸杆菌" },
+            { name: "姜黄素", mech: "抑制NF-κB及MAPK下调COX-2和iNOS减少PGE2及IL-6、TNF-α" },
+            { name: "维生素C", mech: "参与胶原蛋白合成修复泌尿生殖道黏膜上皮，增强中性粒细胞趋化吞噬" }
+          ]},
+          { id: "58", name: "纠正贫血", components: [
+            { name: "维生素C", mech: "促铁吸收" },
+            { name: "红枣多糖", mech: "cAMP-HIF-1促EPO" },
+            { name: "枸杞多糖", mech: "保护造血干细胞" },
+            { name: "龙眼多糖", mech: "改善携氧" }
+          ]},
+          { id: "18", name: "抗炎抗过敏", components: [
+            { name: "柠檬酸", mech: "抑制肥大细胞脱颗粒" },
+            { name: "EGCG", mech: "抑制肥大细胞Ca²⁺/ERK1/2/NF-κB" },
+            { name: "迷迭香酸", mech: "β2-AR/NF-κB抗炎" },
+            { name: "甘草酸", mech: "STIM1/TRPC1抑制脱颗粒+NF-κB/Nrf2双通路" }
+          ]}
+        ],
+        stopNotice: "61号术后第5天起恢复"
+      },
+      W3: {
+        pathway: "性激素轴恢复（更年期/去势后）、骨密度",
+        products: [
+          { id: "35", name: "更年期调理", components: [
+            { name: "葛根黄酮", mech: "激活ERβ通路发挥植物雌激素样双向调节作用，稳定下丘脑体温调节中枢减少血管舒缩症状" },
+            { name: "酸枣仁皂甙", mech: "调节GABA_A及GABA_B受体活性增强中枢抑制性递质功能，降低皮质醇调节HPA轴应激反应" },
+            { name: "碳酸钙", mech: "补充骨矿化原料降低PTH分泌，调节RANKL/OPG信号通路抑制破骨细胞过度活化减缓骨量流失" },
+            { name: "百合多糖", mech: "高亲和力激活ERβ调节大脑神经递质，经肠-脑轴改善肠道菌群阻断外周炎症因子向中枢传递，发挥抗焦虑与神经保护作用" }
+          ]},
+          { id: "59", name: "骨健康", components: [
+            { name: "柠檬酸钙", mech: "高溶解性吸收不依赖胃酸" },
+            { name: "葛根黄酮", mech: "激活PI3K/Akt及MAPK上调成骨细胞Runx2促进骨基质分泌与羟基磷灰石结晶" },
+            { name: "黑豆多糖", mech: "结合ERα/ERβ上调OPG下调RANKL抑制破骨细胞分化（去势后骨流失加速期核心）" },
+            { name: "山药多糖", mech: "激活Wnt/β-catenin促进间充质干细胞成骨分化" },
+            { name: "茯苓多糖", mech: "G6PD/STAT3延缓骨髓间充质干细胞衰老" }
+          ]}
+        ],
+        stopNotice: "—"
+      }
+    }
+  },
+
+  G: {
+    name: "浅表/眼科",
+    examples: "白内障、疝、皮下肿物切除",
+    corePathway: "轻度氧化应激；低炎症负荷；恢复快",
+    windows: {
+      W1: {
+        pathway: "基础抗氧化储备",
+        products: [
+          { id: "64", name: "线粒体+综合", components: [
+            { name: "叶黄素酯", mech: "黄斑色素沉积，蓝光过滤与单线态氧猝灭，激活Nrf2/ARE抗氧化通路" },
+            { name: "虾青素", mech: "跨越血视网膜屏障强效清除自由基，抑制NF-κB炎症信号，抑制脂质过氧化链式反应" },
+            { name: "PQQ", mech: "结合稳定Trx1，激活PGC-1α/Nrf2诱导线粒体生物发生" },
+            { name: "低聚异麦芽糖", mech: "选择性增殖双歧杆菌促进SCFA生成维护肠道紧密连接" }
+          ]},
+          { id: "18", name: "抗炎抗过敏", components: [
+            { name: "柠檬酸", mech: "抑制IgE介导肥大细胞脱颗粒阻断FcεRI→Syk→PLCγ→Ca²⁺通路" },
+            { name: "EGCG", mech: "抑制肥大细胞Ca²⁺上升衰减ERK1/2和NF-κB抑制TNF-α、IL-6、IL-8" },
+            { name: "迷迭香酸", mech: "靶向β2-AR抑制NF-κB降低炎症浸润" },
+            { name: "甘草酸", mech: "STIM1/TRPC1抑制脱颗粒+NF-κB/Nrf2/HO-1双通路" }
+          ]}
+        ],
+        stopNotice: "—"
+      },
+      W2: {
+        pathway: "切口愈合",
+        products: [
+          { id: "12", name: "切口愈合", components: [
+            { name: "真菌多糖（β-葡聚糖）", mech: "激活巨噬细胞、树突状细胞及NK细胞，促进Th1型免疫应答" },
+            { name: "姜黄素", mech: "抑制NF-κB过度活化下调TNF-α、IL-6、IL-1β" },
+            { name: "葡萄糖酸锌", mech: "作为脱碘酶辅因子参与T4→T3转化，精细调节T细胞分化促进Tregs，通过金属硫蛋白和SOD减少脂质过氧化损伤" },
+            { name: "维生素C", mech: "强效水溶性抗氧化直接中和自由基，促进胶原蛋白合成，协同锌构成双重抗氧化屏障加速切口愈合" }
+          ]},
+          { id: "63", name: "呼吸道黏膜", components: [
+            { name: "绿原酸", mech: "激活Nrf2/ARE上调SOD、HO-1清除ROS抑制NF-κB/MAPK" },
+            { name: "维生素C", mech: "支持胶原蛋白合成维持黏膜结构，促进中性粒细胞趋化吞噬" },
+            { name: "甘草酸", mech: "促进黏膜分泌稀释痰液增强纤毛运动，类固醇样抗炎抑制磷脂酶A2减少组胺" },
+            { name: "葡萄糖酸锌", mech: "作为锌指蛋白辅因子调控上皮紧密连接蛋白合成，维持T细胞成熟及巨噬细胞吞噬" }
+          ]}
+        ],
+        stopNotice: "—"
+      },
+      W3: {
+        pathway: "长期基础支持",
+        products: [
+          { id: "64", name: "线粒体+综合", components: [
+            { name: "PQQ", mech: "激活PGC-1α/Nrf2线粒体生物发生" },
+            { name: "虾青素", mech: "跨越血视网膜屏障清除ROS抑制脂质过氧化" },
+            { name: "叶黄素酯", mech: "黄斑保护与蓝光过滤" },
+            { name: "低聚异麦芽糖", mech: "肠-脑轴菌群调节" }
+          ]}
+        ],
+        stopNotice: "—"
+      }
+    }
+  }
+};
+
+const baselines = [
+  { id: "nutrition", label: "NRS2002 ≥3分（营养风险）", desc: "提前2周启动，优先加19+58免疫调节和抗氧化", effect: "营养差者提前介入，W1期免疫调节和抗氧化产品全量上线" },
+  { id: "sarcopenia", label: "肌少症（SARC-F≥4）", desc: "握力下降、步速慢", effect: "W1期即启动59+19骨/肌肉类产品；W3期持续联合抗阻训练" },
+  { id: "diabetes", label: "糖尿病（HbA1c≥6.5%）", desc: "或术后血糖>10mmol/L", effect: "全程52号稳糖在线；精氨酸/谷氨酰胺类慎用" },
+  { id: "renal", label: "eGFR <60（肾功能不全）", desc: "高钾风险", effect: "51号全程禁；59号钙剂量减半；钙磷监测" },
+  { id: "anticoag", label: "抗凝中（华法林/DOAC/双抗）", desc: "房颤、支架后、机械瓣", effect: "全程禁：13、20、24、33、50、55、57；18号作为替代抗炎方案" }
+];
+
+// ========== 状态与交互 ==========
+
+let selectedSurgery = null;
+let selectedTime = null;
+let selectedBaselines = [];
+
+function renderSurgeries() {
+  const grid = document.getElementById('surgeryGrid');
+  grid.innerHTML = '';
+  Object.keys(surgeries).forEach(key => {
+    const s = surgeries[key];
+    const div = document.createElement('div');
+    div.className = 'surgery-item' + (selectedSurgery === key ? ' selected' : '');
+    div.innerHTML = `<div class="code">${key}</div><div class="name">${s.name}</div><div class="examples">${s.examples}</div>`;
+    div.onclick = () => { selectedSurgery = key; renderSurgeries(); };
+    grid.appendChild(div);
+  });
+}
+
+function renderTimes() {
+  const grid = document.getElementById('timeGrid');
+  grid.innerHTML = '';
+  const times = [
+    { id: 'W1', label: 'W1', period: '术前2-4周', desc: '预康复期：肌少症/贫血/慢性炎症基线调理' },
+    { id: 'W2', label: 'W2', period: '术后3-14天', desc: '合成期：肠功能恢复/伤口愈合/炎症消退' },
+    { id: 'W3', label: 'W3', period: '术后2周-3月', desc: '功能恢复期：骨/肌肉/神经/认知各自修复' }
+  ];
+  times.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'time-item' + (selectedTime === t.id ? ' selected' : '');
+    div.innerHTML = `<div class="label">${t.label}</div><div class="period">${t.period}</div><div class="desc">${t.desc}</div>`;
+    div.onclick = () => { selectedTime = t.id; renderTimes(); };
+    grid.appendChild(div);
+  });
+}
+
+function renderBaselines() {
+  const list = document.getElementById('baselineList');
+  list.innerHTML = '';
+  baselines.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'baseline-item' + (selectedBaselines.includes(b.id) ? ' selected' : '');
+    div.innerHTML = `<input type="checkbox" ${selectedBaselines.includes(b.id) ? 'checked' : ''}><div><div class="label">${b.label}</div><div class="desc">${b.desc}</div></div>`;
+    div.onclick = () => {
+      if (selectedBaselines.includes(b.id)) {
+        selectedBaselines = selectedBaselines.filter(x => x !== b.id);
+      } else {
+        selectedBaselines.push(b.id);
+      }
+      renderBaselines();
+    };
+    list.appendChild(div);
+  });
+}
+
+function goStep(n) {
+  document.querySelectorAll('.container > div').forEach(el => el.classList.add('hidden'));
+  document.getElementById('step' + n).classList.remove('hidden');
+}
+
+function goStep1() { goStep(1); }
+function goStep2() { if (!selectedSurgery) { alert('请先选择手术类型'); return; } goStep(2); }
+function goStep3() { if (!selectedTime) { alert('请先选择时间窗'); return; } goStep(3); }
+
+function generateResult() {
+  const s = surgeries[selectedSurgery];
+  const w = s.windows[selectedTime];
+
+  // 概览
+  document.getElementById('overviewBox').innerHTML = `
+    <div class="row">
+      <div><span>手术类型：</span>${selectedSurgery} ${s.name}</div>
+      <div><span>时间窗：</span>${selectedTime}（${selectedTime === 'W1' ? '术前2-4周预康复' : selectedTime === 'W2' ? '术后3-14天合成期' : '术后2周-3月功能恢复期'}）</div>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <div><span>核心通路扰动：</span>${s.corePathway}</div>
+    </div>
+  `;
+
+  // 结果
+  let html = '';
+  html += `<div class="result-section"><h3>分子通路指征</h3><div class="pathway-box"><div class="label">本时间窗核心通路：</div><div class="content">${w.pathway}</div></div></div>`;
+
+  html += `<div class="result-section"><h3>推荐产品（共${w.products.length}款）</h3>`;
+  w.products.forEach(p => {
+    html += `<div class="product-card"><div><span class="product-id">${p.id}号</span><span class="product-name">${p.name}</span></div><div class="component-list">`;
+    p.components.forEach(c => {
+      html += `<div class="component-item"><div class="comp-name">${c.name}</div><div class="mech">${c.mech}</div></div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+
+  // 停药提醒
+  if (w.stopNotice && w.stopNotice !== '—') {
+    html += `<div class="stop-notice"><h4>停药/恢复提醒</h4><p>${w.stopNotice}</p></div>`;
+  }
+
+  // 基线修正叠加
+  if (selectedBaselines.length > 0) {
+    html += `<div class="result-section"><h3>老年基线修正叠加</h3>`;
+    selectedBaselines.forEach(bid => {
+      const b = baselines.find(x => x.id === bid);
+      html += `<div class="product-card" style="border-left-color:#b08d57;"><div class="product-id" style="color:#b08d57;">${b.label}</div><div class="mech" style="margin-top:8px;font-size:13px;color:#666;">${b.effect}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 缺口提示
+  html += `<div class="gap-notice"><h4>临床强化缺口提示</h4><p>本方案为日常维持剂量匹配。临床强化方案（术后免疫营养、预康复蛋白质补充、骨健康强化维生素D等）需由手术医生/临床营养师根据患者个体情况处方补充。术后0-3天肠麻痹期不使用口服产品。</p></div>`;
+
+  document.getElementById('resultContent').innerHTML = html;
+  goStep(4);
+}
+
+function resetAll() {
+  selectedSurgery = null;
+  selectedTime = null;
+  selectedBaselines = [];
+  renderSurgeries();
+  renderTimes();
+  renderBaselines();
+  goStep(1);
+}
+
+// 初始化
+renderSurgeries();
+renderTimes();
+renderBaselines();
+</script>
+
+</body>
+</html>
